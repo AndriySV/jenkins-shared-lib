@@ -1,0 +1,114 @@
+#!/usr/bin/env groovy
+
+// Example Jenkinsfile demonstrating the use of this shared library
+// To use this library in your Jenkins instance, configure it in:
+// Manage Jenkins -> Configure System -> Global Pipeline Libraries
+
+// Load the shared library
+@Library('jenkins-shared-lib') _
+
+// Import utility classes
+import com.example.jenkins.Logger
+import com.example.jenkins.Config
+
+pipeline {
+    agent any
+    
+    environment {
+        APP_NAME = 'my-application'
+        APP_VERSION = '1.0.0'
+    }
+    
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    // Use the Logger utility
+                    def logger = new Logger(this)
+                    logger.info('Starting pipeline execution')
+                    
+                    // Use the sayHello step
+                    sayHello('Jenkins User')
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                script {
+                    // Use the buildApp step
+                    buildApp(
+                        buildTool: 'maven',
+                        skipTests: false
+                    )
+                }
+            }
+        }
+        
+        stage('Deploy to Dev') {
+            steps {
+                script {
+                    // Use the deployApp step
+                    deployApp(
+                        environment: 'dev',
+                        appName: env.APP_NAME,
+                        version: env.APP_VERSION
+                    )
+                }
+            }
+        }
+        
+        stage('Deploy to Staging') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    deployApp(
+                        environment: 'staging',
+                        appName: env.APP_NAME,
+                        version: env.APP_VERSION
+                    )
+                }
+            }
+        }
+        
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            input {
+                message "Deploy to production?"
+                ok "Deploy"
+            }
+            steps {
+                script {
+                    deployApp(
+                        environment: 'prod',
+                        appName: env.APP_NAME,
+                        version: env.APP_VERSION
+                    )
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            script {
+                notifySlack(
+                    message: "✅ Pipeline succeeded: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    color: 'good'
+                )
+            }
+        }
+        failure {
+            script {
+                notifySlack(
+                    message: "❌ Pipeline failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    color: 'danger'
+                )
+            }
+        }
+    }
+}
