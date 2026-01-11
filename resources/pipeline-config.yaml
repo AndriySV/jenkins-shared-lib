@@ -1,0 +1,34 @@
+# Example Pipeline Configuration
+
+# Default build settings
+build:
+  timeout: 60
+  retry: 3
+  
+# Environment configurations
+environments:
+  dev:
+    url: https://dev.example.com
+    replicas: 1
+  staging:
+    url: https://staging.example.com
+    replicas: 2
+  prod:
+    url: https://prod.example.com
+    replicas: 3
+
+# Notification settings
+notifications:
+  slack:
+    enabled: true
+    channel: '#ci-cd'
+  email:
+    enabled: false
+    recipients: []
+
+# Security scanning
+security:
+  enabled: true
+  tools:
+    - sonarqube
+    - dependency-check
