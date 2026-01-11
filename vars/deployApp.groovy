@@ -12,7 +12,10 @@
  */
 def call(Map config = [:]) {
     def environment = config.environment ?: 'dev'
-    def appName = config.appName ?: error('appName is required')
+    def appName = config.appName
+    if (!appName) {
+        error('appName is required')
+    }
     def version = config.version ?: 'latest'
     def deployCommand = config.deployCommand
     

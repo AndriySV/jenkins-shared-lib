@@ -35,7 +35,7 @@ class Config implements Serializable {
      * Merge another configuration map
      */
     void merge(Map otherConfig) {
-        config = config + otherConfig
+        config.putAll(otherConfig)
     }
     
     /**
